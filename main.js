@@ -2,7 +2,7 @@ const products = document.querySelectorAll(".producto_contenedor");
 
 const element = document.createElement("div");
 element.innerHTML = `
-<div style="font-weight:700;;position:fixed;bottom:0;padding:1em;background-color:gray;font-size:1.5em;">
+<div style="font-weight:700;position:fixed;bottom:0;padding:1em;background-color:gray;font-size:1.5em;">
     <p style="color:#000;"><span>precio costo:   </span><span id="precioCosto"></span></p>
     <p style="color:lightgreen;"><span>.precio 35%: $</span><span id="precio35"></span></p>
     <p style="color:lightgreen;"><span>.precio 40%: $</span><span id="precio40"></span></p>
@@ -10,6 +10,12 @@ element.innerHTML = `
     <p style="color:lightblue;" ><span>unidad 40%: $</span><span id="precio40Uni"></span></p></div>`;
 
 document.body.appendChild(element);
+
+const calcButtonStyle =
+  "cursor:pointer;border-radius:0.5em;text-align:center;width:60%;background-color:red;color:#fff;padding:0.5em;margin:0.5em auto;";
+
+const calcInputStyle =
+  "border-radius:0.5em;text-align:center;width:90%;color:#000;padding:0.25em;margin:0 auto 2em auto;";
 
 const $showPrecioCosto = document.getElementById("precioCosto");
 const $showPrecio35 = document.getElementById("precio35");
@@ -23,6 +29,8 @@ for (let el of products) {
   elementInput.classList.add("cant--input");
   element.textContent = "calcular precio";
   element.classList.add("calc--price");
+  element.setAttribute("style", calcButtonStyle);
+  elementInput.setAttribute("style", calcInputStyle);
   el.appendChild(element);
   el.appendChild(elementInput);
 }
@@ -58,8 +66,8 @@ addEventListener("click", (e) => {
     } else {
       $showPrecio35.style.backgroundColor = "black";
       $showPrecio40.style.backgroundColor = "transparent";
-      $showPrecio35Uni.style.backgroundColor = "black";
-      $showPrecio40Uni.style.backgroundColor = "transparent";
+      $showPrecio35Uni.style.backgroundColor = "transparent";
+      $showPrecio40Uni.style.backgroundColor = "black";
     }
   }
 });
