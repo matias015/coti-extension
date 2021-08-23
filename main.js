@@ -1,4 +1,4 @@
-const products = document.querySelectorAll(".producto");
+const products = document.querySelectorAll(".producto_contenedor");
 
 const element = document.createElement("div");
 element.innerHTML = `
