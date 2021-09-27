@@ -9,10 +9,28 @@
     "background":{
         "scripts":["background.js"]
     },
+
+    "commands":{
+        "start":{
+            "suggested_key":{
+                "default":"Ctrl+Shift+L",
+                "mac":"Command+Shift+L"
+            },
+            "description": "start app",
+            "shortcut":"Ctrl+Shift+L",
+            "global": true
+        }
+    },
+
     "browser_action":{
         "default_icon":"icon.png"
     },
     "permissions":[
-        "activeTab"
+        "activeTab",
+        "tabs",
+        "http://www.cotilloncasaalberto.com.ar/*",
+        "https://www.cotilloncasaalberto.com.ar/*",
+        "tts",
+        "storage"
     ]
 }
