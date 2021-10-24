@@ -33,12 +33,35 @@ if (!document.getElementById("showbox")) {
       product_id = parseInt(product_id.replaceAll("Código: ", ""));
 
       //conseguir el input de unidades
+
       units = parseFloat(
         selected_product.parentElement.querySelector(".cant--input").value
       );
 
       //si es 0 o esta vacio o hay una letra, sera 1
-      if (!units) units = 1;
+      if (!units) {
+        let reg = /[^0-9a-z\D]*x ?[0-9]+ ?g?r?s?k?g?m?l?/;
+        let match = reg.exec(item_name.trim());
+
+        if (match) {
+          units = match[0];
+          units = units.replaceAll("x", "");
+
+          if (units.includes("grs") || units.includes("ml")) {
+            units = units.replaceAll("g", "");
+            units = units.replaceAll("r", "");
+            units = units.replaceAll("s", "");
+            units = units.replaceAll("m", "");
+            units = units.replaceAll("l", "");
+            units = parseInt(units);
+            if (units < 100) units = 1;
+            else units = units / 100;
+          }
+          units = parseInt(units);
+        } else {
+          units = 1;
+        }
+      }
 
       //calcular precios al 35 y al 40 con las unidades
       price_35 = Math.round(cost_price * 1.05 * 1.21 * 1.35 * 100) / 100;
@@ -54,6 +77,11 @@ if (!document.getElementById("showbox")) {
       price_40_uni = Math.round(price_40_uni * 4) / 4;
 
       //mostrar los resultados en la box
+      let reg_for_name = /[0-9]+?-?[0-9]+$/;
+      let name_match = reg_for_name.exec(item_name.trim());
+      if (name_match) {
+        item_name = item_name.replaceAll(name_match[0], "");
+      }
       $box_item_name.textContent = item_name;
       $box_item_units.textContent = units;
       $box_cost_price.textContent = cost_price;
@@ -93,7 +121,7 @@ if (!document.getElementById("showbox")) {
   </p>
 
   <p class="units">
-      <span>unidades: </span>
+      <span>division: </span>
       <span style="color:blue;" contenteditable id="unidades" ></span>
   </p> 
 
@@ -258,15 +286,17 @@ if (!document.getElementById("showbox")) {
     addEventListener("click", (e) => {
       if (e.target.classList.contains("boton-calcular"))
         calc_product_price(e, null);
+      let date = new Date();
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
 
       if (e.target.classList.contains("copiar")) {
         let id = $box_product_id.textContent;
         let name = $box_item_name.textContent;
         let price_35 = $box_price_35.textContent;
         let price_40_uni = $box_price_40_uni.textContent;
-        let units = $box_item_units.textContent;
 
-        let to_copy = `${id}${next}${name.trim()}${next}${units}${next}${price_35}${next}${price_40_uni}${next}-${next}-${next}-${next}-`;
+        let to_copy = `${id}${next}${name.trim()}${next}-${next}${price_35}${next}${price_40_uni}${next}-${next}-${next}-${next}${day}.${month}`;
         navigator.clipboard.writeText(to_copy);
       }
 
@@ -275,9 +305,8 @@ if (!document.getElementById("showbox")) {
         let name = $box_item_name.textContent;
         let price_40 = $box_price_40.textContent;
         let price_40_uni = price_40;
-        let units = $box_item_units.textContent;
 
-        let to_copy = `${id}${next}${name.trim()}${next}${units}${next}${price_40}${next}${price_40_uni}${next}-${next}-${next}-${next}-`;
+        let to_copy = `${id}${next}${name.trim()}${next}-${next}${price_40}${next}${price_40_uni}${next}-${next}-${next}-${next}${day}.${month}`;
         navigator.clipboard.writeText(to_copy);
       }
 
@@ -305,8 +334,8 @@ if (!document.getElementById("showbox")) {
       product.removeChild($uni_amount_input);
     }
   }
-  
   window.onbeforeunload = closeIt;
+
   Main();
 } else {
   console.log("ya iniciado");
