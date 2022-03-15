@@ -1,4 +1,3 @@
-
 //check for local storage default vars
 let defaultTotal = localStorage.getItem('defaultTotal') || 1.4
 let defaultUnit = localStorage.getItem('defaultUnit') || 1.35
@@ -6,6 +5,15 @@ let defaultUnit = localStorage.getItem('defaultUnit') || 1.35
 function main(){
   // global value to copy
   let ToCopy = []
+
+  //iva and others
+  let IVA = localStorage.getItem('iva') || 1.21;
+  let extra1 = localStorage.getItem('extra1') || 1.05
+  let extra2 = 1
+
+  //seeall actual
+  let ActualSeeAllPrice = null
+  let ActualSeeAllUnits = null
 
   //values to calc seeall
   const PorcValues = [1.25,1.3,1.35,1.4,1.45,1.5,1.55,1.6]
@@ -33,14 +41,14 @@ function main(){
     // html to each card
     let html = `
     <hr style="width:90%;"/>
-      <input class="unitInput" id="amount" type="text" value="${units}">
+      <input class="unitInput unitInputSty" id="amount" type="text" value="${units}">
       <div style="width:100%" class="font flex">
-          <span class="font price" id="final">${final}</span> 
-          <span class="font price" id="units">${finalUnit}</span>
+          <span contenteditable class="font price" id="final">${final}</span> 
+          <span contenteditable class="font price" id="units">${finalUnit}</span>
       </div>
       <p style="width: 75%;text-align:center;" class="pointer font see_all">ver todos</p>
       <p style="width: 75%;text-align:center;" class="pointer font copy">copiar</p>
-      <input class="amountRef unitInput" type="text" value="1">
+      <input class="amountRef unitInputSty" type="text" value="1">
 
       <style>
       .price{ background-color:rgb(225,225,225); border-radius:5px; padding:0.25em}
@@ -48,7 +56,7 @@ function main(){
       .font{ font-size: 1.3em; }
       .see_all{ height:23px; width:75%; background-color: rgb(255, 14, 14); color:white; border-radius:5px; }
       .copy{ width:75%; height:20px; outline: solid 3px rgb(255, 14, 14); border-radius:5px; }
-      .unitInput{width: 90%; border-radius:5px; text-align:center;}
+      .unitInputSty{width: 90%; border-radius:5px; text-align:center;}
       .wh100{ width: 100%; height: 100%; }
       .flex{ display: flex; justify-content: space-between; align-items: center; }
       .mid{ width: 50%; height: 100%; }
@@ -80,12 +88,16 @@ function main(){
 
   function getPrice(prod,promo){
     if(promo){
-      let price = find('.con_promo',prod).textContent
-      return price.replace('$','').trim()
+      return find('.con_promo',prod)
+        .textContent
+        .replace('$','')
+        .trim()
     }
     else{
-      let price = find('.producto_precio',prod).textContent
-      return price.replace('$','').trim()
+      return find('.producto_precio',prod)
+        .textContent
+        .replace('$','')
+        .trim()
   }}
 
   function getName(prod){
@@ -95,8 +107,10 @@ function main(){
   }
 
   function getId(prod){
-      let id = find('.producto_id',prod).textContent
-      return id.replace('Código:','').trim()
+    return find('.producto_id',prod)
+    .textContent
+    .replace('Código:','')
+    .trim()
   }
 
   function getUnits(name){
@@ -112,13 +126,13 @@ function main(){
   }
 
   function calculate(price,units){
-    let val = round(price*defaultTotal,100)
+    let val = round(price*defaultTotal*IVA*extra1,100)
     
     if(units === 1 || units === '1'){
       return [`$ ${val}`, `$ ${val}`]
     }
     else {
-      return [`$ ${val}`, `$ ${round(price*defaultUnit/units,4)}`]
+      return [`$ ${val}`, `$ ${round(price*defaultUnit*IVA*extra1/units,4)}`]
     }
   }
 
@@ -127,7 +141,7 @@ function main(){
   }
 
   function validateUnit(unit){
-    let regexp = /^([0-9]+)(,)?([0-9]+)?$/g
+    let regexp = /^([0-9]+)((,)?(\.)?)([0-9]+)?$/g
     if(unit.match(regexp)) {
       return unit.replaceAll(',','.')
     }
@@ -137,21 +151,31 @@ function main(){
   function unitChange(e){
     // if input change is the default for total porcentage set the value on local storage
     if(targetHas(e,'setDefault')){
-      let value = e.target.value
-      localStorage.setItem('defaultTotal',parseFloat(value))
+      let value = parseFloat(e.target.value)
+      localStorage.setItem('defaultTotal',value)
     }
     // the same for unit input
     else if(targetHas(e,'setDefaultUnit')){
-      let value = e.target  .value
-      localStorage.setItem('defaultUnit',parseFloat(value))
+      let value = parseFloat(e.target.value)
+      localStorage.setItem('defaultUnit',value)
+    }
+
+    else if(targetHas(e,'setIva')){
+      let value = parseFloat(e.target.value)
+      localStorage.setItem('iva',value)
+    }
+
+    else if(targetHas(e,'setExtra1')){
+      let value = parseFloat(e.target.value)
+      localStorage.setItem('extra1',value)
     }
 
     //if its the input of some product
     else if(targetHas(e,'unitInput')){
+      let newUnit = validateUnit(e.target.value)
       //get info
       let prod = parent(e.target,2)
       let price = getPrice(prod)
-      let newUnit = validateUnit(e.target.value)
       // calc new prices
       let [final,unit] = calculate(price,newUnit)
       // set him in doc
@@ -160,8 +184,12 @@ function main(){
     }
 
     else if(targetHas(e,'filter')){
-      if(e.target.value == FILTEREDVALUE) return
-      else mark(e.target.value)
+      let val = e.target.value.trim()
+
+      //if theres less than 3 elements in screen or is already filtered
+      if (products.length < 3 || val == FILTEREDVALUE) return
+      if (val == '') return resetFilter()
+      else mark(val)
     }
   }
 
@@ -191,36 +219,35 @@ function main(){
           str.splice(index,1)
         }
       }
-      else matches--
+      //else matches--
       i++
     }
     return matches
   }
 
   function mark(val){
-    if(val == '') resetFilter()
     FILTEREDVALUE = val
-    const exp =`[${val}]`
     let names = Array.from(findall('.producto div .producto_txt'))
     let matches= []
-    names.forEach((name,i) => {
+    names.forEach(name => {
       matches.push([name,search(name.textContent,val)])
     })
     matches = matches.sort((a,b) => b[1]-a[1])
     let max = matches[0][1]
     let min = take(matches,-1)[1]
     if(min<0) min = 0
+    if(min == max) return resetFilter()
     matches.forEach(name=>{
       let range = scale(name[1], min, max, 0, 255)
       parent(name[0],2).style.backgroundColor = `rgb(${255-range},${range},0,0.5)`
     })
-    
-    
   }
 
   function resetFilter(){
+    if(FILTEREDVALUE){
+    FILTEREDVALUE = null
     Array.from(findall('.producto')).forEach(el=>el.style.backgroundColor='')
-  }
+  }}
 
   function addUI(){
     // contains the inputs for change defaults porc and seeall visualizer
@@ -272,8 +299,12 @@ function main(){
       .showallnum:hover{ color:red; }
       </style>
     <input value="${defaultTotal}" style="width: 8em" class="setDefault" type="text" >
-    <input value="${defaultUnit}" type="text" style="width: 8em" class="setDefaultUnit">`
-
+    <input value="${defaultUnit}" type="text" style="width: 8em" class="setDefaultUnit">
+    <br/>
+    <input value="${IVA}" type="text" style="width: 8em" class="setIva">
+    <input value="${extra1}" type="text" style="width: 8em" class="setExtra1">
+    `
+    
     newEl('div',uiHtml,{
       parent:document.body,
       attrs:['class','ui','style','background-color:lightgray;position: fixed;bottom: 0;left: 0;padding:1em;']
@@ -306,9 +337,8 @@ function main(){
       
       if(targetHas(e,'see_all')){
         let prod = parent(e.target,2)
-        let price = getPrice(prod)
-        seeAllCalc(prod,price)
-        UI.classList.remove('swiped')
+        seeAllCalc(prod)
+
       }
 
       if(targetHas(e,'copy')){
@@ -320,15 +350,20 @@ function main(){
       }
 
       if(targetHas(e,'showAllTotal')){
+        let value = e.target.textContent
+
+        if(ToCopy[3] === `$ ${value}` || value === '') return
         ToCopy[3] = `$ ${e.target.textContent}`
         copy()
       }
 
       if(targetHas(e,'showAllUnit')){
-        ToCopy[4] = `$ ${e.target.textContent}`
+        let value = e.target.textContent
+
+        if(ToCopy[4] === `$ ${value}` || value === '') return
+        ToCopy[4] = `$ ${value}`
         copy()
       }
-
     })
   }
 
@@ -338,21 +373,27 @@ function main(){
     prod.style.marginBottom = '50px'
   }
 
-  function seeAllCalc(prod,price){
+  function seeAllCalc(prod){
+    // get units and price from card input
+    let units = find('.unitInput',prod).value
+    let price = getPrice(prod,inPromo(prod))
+
+    //if are equal to previous seeall calc dont do it again
+    if(price == ActualSeeAllPrice && units == ActualSeeAllUnits) return
+    
+    //else update values
+    ActualSeeAllPrice = price
+    ActualSeeAllUnits = units
+
     let totalPrices = []
     let unitPrices = []
 
-    // get units from card input
-    let units = find('.unitInput',prod).value
-
+    //for each porcentage calc the price of total and unit
     for(let value of PorcValues){
-      let total = round(price*value,10)
-      let unit = round(price*value/units,4)
-
-      totalPrices.push(total)
-      unitPrices.push(unit)
+      totalPrices .push( round(price*value*IVA*extra1,10) )
+      unitPrices  .push( round(price*value*IVA*extra1/units,10) )
     }
-    seeallSetValues(totalPrices,unitPrices,prod)
+    seeallSetValues(totalPrices,unitPrices)
   }
 
   function seeallSetValues(totalPrices,unitPrices){
@@ -361,9 +402,9 @@ function main(){
 
     fillContent(totalElements,totalPrices)
     fillContent(unitElements,unitPrices)
+
+    UI.classList.remove('swiped')
   }
-
-
 
 
   ////////////////////////////////////////////////////////////////////
@@ -378,7 +419,7 @@ function main(){
   }
 
   function newEl(tag, cont, props) {
-      if(!props) props = {}
+    if(!props) props = {}
     const e = document.createElement(tag)
     e.innerHTML = cont
     if (props.clss) e.classList.add(props.clss)
@@ -431,7 +472,7 @@ function main(){
 
   function cbcopy(text) {
     navigator.clipboard.writeText(text)
-      .catch(() => console.log('there was a problem'))
+      .catch(() => console.log('no anda :('))
   }
 
   function scale (number, inMin, inMax, outMin, outMax) {
