@@ -129,15 +129,15 @@ function main(){
     let val = round(price*defaultTotal*IVA*extra1,100)
     
     if(units === 1 || units === '1'){
-      return [`$ ${val}`, `$ ${val}`]
+      return [`$ ${val.toLocaleString()}`, `$ ${val.toLocaleString()}`]
     }
     else {
-      return [`$ ${val}`, `$ ${round(price*defaultUnit*IVA*extra1/units,4)}`]
+      return [`$ ${val.toLocaleString()}`, `$ ${round(price*defaultUnit*IVA*extra1/units,4).toLocaleString()}`]
     }
   }
 
   function setChangeEvent(){
-    window.addEventListener('change',unitChange)
+    window.addEventListener('change', unitChange)
   }
 
   function validateUnit(unit){
@@ -194,8 +194,9 @@ function main(){
   }
 
   function search(name,searchVal){
-    let str = name.split('')
-    let value = searchVal.split('')
+    
+    let str = name.toLowerCase().split('')
+    let value = searchVal.toLowerCase().split('')
 
     let matches = 0
 
@@ -369,7 +370,7 @@ function main(){
 
   function modifedProdCar(prod,promo){
     prod.style.height = '650px'
-    if(!promo) prod.style.overflowX = 'hidden'
+    // if(!promo) prod.style.overflowX = 'hidden'
     prod.style.marginBottom = '50px'
   }
 
@@ -390,8 +391,10 @@ function main(){
 
     //for each porcentage calc the price of total and unit
     for(let value of PorcValues){
-      totalPrices .push( round(price*value*IVA*extra1,10) )
-      unitPrices  .push( round(price*value*IVA*extra1/units,10) )
+      console.log(round(price*value*IVA*extra1,10).toLocaleString());
+      
+      totalPrices .push( round(price*value*IVA*extra1,10).toLocaleString() )
+      unitPrices  .push( round(price*value*IVA*extra1/units,10).toLocaleString() )
     }
     seeallSetValues(totalPrices,unitPrices)
   }
