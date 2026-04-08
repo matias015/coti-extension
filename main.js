@@ -18,9 +18,6 @@ function main(){
   //values to calc seeall
   const PorcValues = [1.25,1.3,1.35,1.4,1.45,1.5,1.55,1.6]
 
-  //style for html container inside each prod card
-  let style = `<style>.containter{width: 100%;height: 100%;background-color: aqua;}</style>`
-
   let UI            // containt html element of ui
   let FILTEREDVALUE //global value for input filter
 
@@ -32,44 +29,75 @@ function main(){
     let name = getName(prod)
     let units = getUnits(name)
 
-    let cardInfo = find('div',prod)
-    cardInfo.removeChild(find('.content_bulto_unidad_kilo',cardInfo))
+    let bulto = find('.content_bulto_unidad_kilo',prod)
+    if(bulto) prod.removeChild(bulto)
 
     //calculate final prices with default values
     let [final,finalUnit] = calculate(price,units)
 
     // html to each card
     let html = `
-    <hr style="width:90%;"/>
-      <input class="unitInput unitInputSty" id="amount" type="text" value="${units}">
-      <div style="width:100%" class="font flex">
-          <span contenteditable class="font price" id="final">${final}</span> 
-          <span contenteditable class="font price" id="units">${finalUnit}</span>
+      <div class="coti-panel">
+        <div class="coti-input-group">
+            <span class="coti-lbl">Unidades:</span>
+            <input class="unitInput coti-inp-full" id="amount" type="text" value="${units}">
+        </div>
+
+        <div class="coti-price-list">
+            <div class="coti-price-row">
+                <span class="coti-lbl-sm">Venta Total</span>
+                <span contenteditable class="coti-val" id="final">${final}</span> 
+            </div>
+        </div>
+
+        <div class="coti-price-list">
+            <div class="coti-price-row highlight">
+                <span class="coti-lbl-sm">Por Unidad</span>
+                <span contenteditable class="coti-val" id="units">${finalUnit}</span>
+            </div>
+        </div>
+        
+        <div class="coti-actions">
+            <button type="button" class="pointer coti-btn see_all">Ver todos</button>
+            <button type="button" class="pointer coti-btn outline copy">Copiar</button>
+        </div>
+        
+        <div class="coti-input-group-sm">
+            <span class="coti-lbl-sm" style="margin:0;">Ref:</span>
+            <input class="amountRef coti-inp-sm" type="text" value="1">
+        </div>
       </div>
-      <p style="width: 75%;text-align:center;" class="pointer font see_all">ver todos</p>
-      <p style="width: 75%;text-align:center;" class="pointer font copy">copiar</p>
-      <input class="amountRef unitInputSty" type="text" value="1">
 
       <style>
-      .price{ background-color:rgb(225,225,225); border-radius:5px; padding:0.25em}
-      .pointer{ cursor:pointer }
-      .font{ font-size: 1.3em; }
-      .see_all{ height:23px; width:75%; background-color: rgb(255, 14, 14); color:white; border-radius:5px; }
-      .copy{ width:75%; height:20px; outline: solid 3px rgb(255, 14, 14); border-radius:5px; }
-      .unitInputSty{width: 90%; border-radius:5px; text-align:center;}
-      .wh100{ width: 100%; height: 100%; }
-      .flex{ display: flex; justify-content: space-between; align-items: center; }
-      .mid{ width: 50%; height: 100%; }
+      .coti-panel { background: #fdfdfd; padding: 10px; margin-top: auto; display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; }
+      .coti-input-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+      .coti-lbl { font-size: 13px; color: #555; font-weight: bold; margin: 0; }
+      .coti-inp-full { width: 100%; text-align: center; border: 1px solid #ccc; border-radius: 4px; padding: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; }
+      .coti-price-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+      .coti-price-row { background: #f1f3f5; border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e9ecef; }
+      .coti-price-row.highlight { background: #e3f2fd; border: 1px solid #bbdefb; }
+      .coti-price-row.highlight .coti-val { color: #1565c0; }
+      .coti-lbl-sm { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; margin: 0; }
+      .coti-val { font-size: 15px; font-weight: 800; color: #333; }
+      .coti-actions { display: flex; gap: 6px; width: 100%; margin-top: 2px; }
+      .coti-btn { flex: 1; border: none; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 12px; color: white; background: #e03131; cursor: pointer; transition: 0.2s; }
+      .coti-btn:hover { background: #c92a2a; }
+      .coti-btn.outline { background: transparent; color: #e03131; outline: 1px solid #e03131; }
+      .coti-btn.outline:hover { background: #fff5f5; }
+      .coti-input-group-sm { display: flex; justify-content: flex-end; align-items: center; width: 100%; margin-top: 2px; }
+      .coti-inp-sm { width: 40px; text-align: center; border: 1px solid #ccc; border-radius: 4px; padding: 2px; font-size: 11px; margin-left: 5px; }
+      .pointer { cursor: pointer; }
       </style>`
 
     // create element to insert in card
-    let element = newEl('div',html+style,{
-      attrs:["class","wh100 flex","style","padding-top:1em;flex-direction:column;gap:1em;"]
+    let element = newEl('div',html,{
+      attrs:["class","coti-ext-wrapper"]
     })
 
     // modified props of cards to avoid overflow and other css bugs
     modifedProdCar(prod,promo)
-    prod.children[0].appendChild(element) 
+    // append inside .caja_productos (first child of .producto)
+    prod.appendChild(element) 
   })
 
   UI = addUI()          // add input to default values in dom
@@ -78,25 +106,30 @@ function main(){
 
 
   function getProducts(){
-      return Array.from(findall(".producto"));
+      // Exclude the outer wrapper; select the actual product divs
+      return Array.from(findall(".caja_productos"));
   }
 
   function inPromo(prod){
-    if(find('.con_promo',prod)) return true
+    // New site uses .producto_precio_promo or similar; fall back gracefully
+    if(find('.con_promo',prod) || find('.producto_precio_promo',prod)) return true
     else return false
   }
 
   function getPrice(prod,promo){
     if(promo){
-      return find('.con_promo',prod)
+      let promoEl = find('.con_promo',prod) || find('.producto_precio_promo',prod)
+      return promoEl
         .textContent
         .replace('$','')
+        .replace(',','.')
         .trim()
     }
     else{
       return find('.producto_precio',prod)
         .textContent
         .replace('$','')
+        .replace(',','.')
         .trim()
   }}
 
@@ -174,8 +207,10 @@ function main(){
     else if(targetHas(e,'unitInput')){
       let newUnit = validateUnit(e.target.value)
       //get info
-      let prod = parent(e.target,2)
-      let price = getPrice(prod)
+      // e.target is .unitInput -> parent(1)=.coti-row -> parent(2)=.coti-panel -> parent(3)=.coti-ext-wrapper -> parent(4)=.caja_productos
+      let prod = parent(e.target,4)
+      let promo = inPromo(prod)
+      let price = getPrice(prod,promo)
       // calc new prices
       let [final,unit] = calculate(price,newUnit)
       // set him in doc
@@ -228,7 +263,7 @@ function main(){
 
   function mark(val){
     FILTEREDVALUE = val
-    let names = Array.from(findall('.producto div .producto_txt'))
+    let names = Array.from(findall('.caja_productos .producto_txt'))
     let matches= []
     names.forEach(name => {
       matches.push([name,search(name.textContent,val)])
@@ -240,14 +275,15 @@ function main(){
     if(min == max) return resetFilter()
     matches.forEach(name=>{
       let range = scale(name[1], min, max, 0, 255)
-      parent(name[0],2).style.backgroundColor = `rgb(${255-range},${range},0,0.5)`
+      // name[0] is .producto_txt -> parent(1) = .caja_productos
+      parent(name[0],1).style.backgroundColor = `rgb(${255-range},${range},0,0.5)`
     })
   }
 
   function resetFilter(){
     if(FILTEREDVALUE){
     FILTEREDVALUE = null
-    Array.from(findall('.producto')).forEach(el=>el.style.backgroundColor='')
+    Array.from(findall('.caja_productos')).forEach(el=>el.style.backgroundColor='')
   }}
 
   function addUI(){
@@ -256,33 +292,33 @@ function main(){
     <span style="width: 15em;text-align:center;">filtrar</span><input style="width: 14em" class="filter"/>
     <div class="seeallcontainer">
       <div class="a1">
-        <p class="header">porc.</p>
-        <p>25% -> </p> <p>30% -> </p>
-        <p>35% -> </p> <p>40% -> </p>
-        <p>45% -> </p> <p>50% -> </p>
-        <p>55% -> </p> <p>60% -> </p>
+        <div class="header">porc.</div>
+        <div>25% -> </div> <div>30% -> </div>
+        <div>35% -> </div> <div>40% -> </div>
+        <div>45% -> </div> <div>50% -> </div>
+        <div>55% -> </div> <div>60% -> </div>
       </div>
       <div class="a2">
-          <p class="header">total</p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
-          <p contenteditable class="showAllTotal showallnum"></p>
+          <div class="header">total</div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
+          <div contenteditable class="showAllTotal showallnum"></div>
       </div>
       <div class="a3">
-          <p contenteditable class="header">unidah</p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
-          <p contenteditable class="showAllUnit showallnum"></p>
+          <div class="header">unidah</div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
+          <div contenteditable class="showAllUnit showallnum"></div>
       </div>
       <div class="swiper pointer"><</div>
     </div>
@@ -308,7 +344,7 @@ function main(){
     
     newEl('div',uiHtml,{
       parent:document.body,
-      attrs:['class','ui','style','background-color:lightgray;position: fixed;bottom: 0;left: 0;padding:1em;']
+      attrs:['class','ui','style','background-color: #e8d9d9;position: fixed;bottom: 0.5rem;left: 0.5rem;padding:1em;border-radius: 7px;border: 1px solid #0000003d;']
     })
     return find('.ui')
   }
@@ -318,16 +354,16 @@ function main(){
   }
 
   function getCopyInfo(element){
+    // element is already .caja_productos
     ToCopy = []
 
     let priceTotal = find('#final',element).textContent
     let priceUnit = find('#units',element).textContent
-    let card = parent(element)
 
-    let name = getName(card)
-    let id = getId(card)
-    let units = find('.unitInput',card).value
-    let amounref = find('.amountRef',card).value
+    let name = getName(element)
+    let id = getId(element)
+    let units = find('.unitInput',element).value
+    let amounref = find('.amountRef',element).value
 
     ToCopy = pushAll(ToCopy,id,name,units,priceTotal,priceUnit,amounref)
     copy()
@@ -337,13 +373,19 @@ function main(){
     window.addEventListener('click', e => {
       
       if(targetHas(e,'see_all')){
-        let prod = parent(e.target,2)
+        e.preventDefault()
+        e.stopPropagation()
+        // e.target(.see_all) -> parent(1)=.coti-actions -> parent(2)=.coti-panel -> parent(3)=.coti-ext-wrapper -> parent(4)=.caja_productos
+        let prod = parent(e.target,4)
         seeAllCalc(prod)
 
       }
 
       if(targetHas(e,'copy')){
-        getCopyInfo(parent(e.target))
+        e.preventDefault()
+        e.stopPropagation()
+        // e.target(.copy) -> parent(1)=.coti-actions -> parent(2)=.coti-panel -> parent(3)=.coti-ext-wrapper -> parent(4)=.caja_productos
+        getCopyInfo(parent(e.target,4))
       }
 
       if(targetHas(e,'swiper')){
@@ -369,13 +411,18 @@ function main(){
   }
 
   function modifedProdCar(prod,promo){
-    prod.style.height = '650px'
-    // if(!promo) prod.style.overflowX = 'hidden'
-    prod.style.marginBottom = '50px'
+    // prod is now .caja_productos; adjust its parent .producto too
+    prod.style.height = 'auto'
+    prod.style.marginBottom = '10px'
+    let prodWrapper = prod.parentElement
+    if(prodWrapper) {
+      prodWrapper.style.height = 'auto'
+      prodWrapper.style.marginBottom = '50px'
+    }
   }
 
   function seeAllCalc(prod){
-    // get units and price from card input
+    // prod is .caja_productos
     let units = find('.unitInput',prod).value
     let price = getPrice(prod,inPromo(prod))
 
@@ -484,3 +531,4 @@ function main(){
 }
 
 if(!document.querySelector('.ui')) main()
+
