@@ -30,7 +30,7 @@ function main(){
     let units = getUnits(name)
 
     let bulto = find('.content_bulto_unidad_kilo',prod)
-    if(bulto) prod.removeChild(bulto)
+    // if(bulto) prod.removeChild(bulto)
 
     //calculate final prices with default values
     let [final,finalUnit] = calculate(price,units)
@@ -320,13 +320,11 @@ function main(){
           <div contenteditable class="showAllUnit showallnum"></div>
           <div contenteditable class="showAllUnit showallnum"></div>
       </div>
-      <div class="swiper pointer"><</div>
     </div>
 
 
     <style>
-      .swiper{ background-color:gray; border-radius:3px; width:20px; text-align:center; height:100px;line-height:100px;}
-      .swiped{ transform: translateX(-21em) }
+      .swiped{ display: none; }
       .header{ padding-bottom:1em; }
       .seeallcontainer{ font-size:1.25em; font-weight:600; display: flex; align-items:center;width: 100%; height: 100%; }
       .a1{ grid-column:0/1; padding: 1em}
@@ -344,7 +342,11 @@ function main(){
     
     newEl('div',uiHtml,{
       parent:document.body,
-      attrs:['class','ui','style','background-color: #e8d9d9;position: fixed;bottom: 0.5rem;left: 0.5rem;padding:1em;border-radius: 7px;border: 1px solid #0000003d;']
+      attrs:['class','ui swiped','style','z-index:1;background-color: #e8d9d9;position: fixed;bottom: 60px;left: 0.5rem;padding:1em;border-radius: 7px;border: 1px solid #0000003d;']
+    })
+    newEl('div','☰',{
+      parent:document.body,
+      attrs:['class','coti-show-btn','style','z-index:2;position:fixed;bottom:0.5rem;left:0.5rem;background:#e03131;color:white;border-radius:10px;width:100px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;font-size:18px;box-shadow:0 2px 6px #0004;']
     })
     return find('.ui')
   }
@@ -388,7 +390,7 @@ function main(){
         getCopyInfo(parent(e.target,4))
       }
 
-      if(targetHas(e,'swiper')){
+      if(targetHas(e,'coti-show-btn')){
         UI.classList.toggle('swiped')
       }
 

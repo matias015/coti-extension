@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "price calc",
   "description": "calcular precios",
-  "version": "1.4",
+  "version": "1.5",
   "icons": {
     "256": "icon.png"
   },
